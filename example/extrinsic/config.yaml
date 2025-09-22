@@ -1,0 +1,22 @@
+EXCEL_FILE: 'points.xlsx'
+CHESSBOARD:
+  SQUARE_SIZE: 0.2 # m
+  SHAPE:
+    ROWS: 3
+    COLS: 3
+  CENTER: # zero-indexed
+    ROW: 0
+    COL: 0
+CAMERA_IDS: 
+  - 0
+  - 1
+  - 2
+  - 3
+FILE_EXTENSIONS:
+  - '.jpg'
+RESOLUTION: 
+  - 1920
+  - 1080
+SHARED_INTRINSIC:
+  USE_SHARED_INTRINSIC: false
+  CAMERA_ID: 0

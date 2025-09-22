@@ -1,0 +1,10 @@
+CHESSBOARD:
+  SQUARE_SIZE: 0.1 # m
+  SHAPE:
+    ROWS: 3
+    COLS: 3
+FILE_EXTENSIONS:
+  - '.jpg'
+RESOLUTION:
+  - 1920
+  - 1080
