@@ -6,20 +6,32 @@ import os
 import random
 import matplotlib.pyplot as plt
 import pickle
+import argparse
+
+def parse_args():
+    parser = argparse.ArgumentParser()
+    
+    parser.add_argument('root', help='The path to the root of calibration data')
+    parser.add_argument('--camera_name', help='The folder name of the camera you want to calibrate')
+    parser.add_argument('--run_only', action='store_true', help='Don\'t save the result, since it will replace previous file')
+    
+    args = parser.parse_args()
+    return args
 
 def get_config(config_path: str):
-    config = None
-    with open(config_path, 'rb') as f:
-        config = EasyDict(yaml.load(f, yaml.FullLoader))
-
-    return config
+    try:
+        with open(config_path, 'rb') as f:
+            return EasyDict(yaml.load(f, yaml.FullLoader))
+    except Exception as e:
+        print(e)
+        exit(1)
 
 def get_images(folder: str, extensions: list[str]):
     if os.path.exists(folder):
         images = [f'{folder}/{image}' for image in os.listdir(folder) if ('.' + image.split('.')[-1]) in extensions]
     else:
         print(f'Error: No such folder: {folder}')
-        exit(-1)
+        exit(1)
         
     print(f'Total number of images: {len(images)}')
     return images
@@ -32,7 +44,7 @@ def calibrate_camera(images: list[str], checkerboard_size: iter, square_size: in
     objpoints = []  # 3D points
     imgpoints = []  # 2D points
     count = 0
-    max_num_images = min(50, len(images)) # It will take a long time to compute if the number of images exceeds 50
+    max_num_images = min(50, len(images)) # It will take a long time to compute if the number of images is large
     
     random.shuffle(images) # Randomly pick images
     
@@ -55,15 +67,18 @@ def calibrate_camera(images: list[str], checkerboard_size: iter, square_size: in
     return ret, mtx, dist, rvec, tvec
 
 if __name__ == '__main__':
-    DATA_ROOT = '/home/user/Desktop/20250917/calibration'
-    CAMERA_NAME = 'camera3'
-    SAVE_RESULT = False
+    # Fetch arguments
+    args = parse_args()
+    ROOT = args.root
+    CAMERA_NAME = args.camera_name
+    SAVE_RESULT = not args.run_only
     
-    config = get_config(f'{DATA_ROOT}/intrinsic/{CAMERA_NAME}/config.yaml')
-
+    # Fetch configurations
+    config = get_config(f'{ROOT}/intrinsic/{CAMERA_NAME}/config.yaml')
     CHESSBOARD_SIZE = (config.CHESSBOARD.SHAPE.COLS, config.CHESSBOARD.SHAPE.ROWS) # (x, y)
     RESOLUTION = config.RESOLUTION
-    images = get_images(f'{DATA_ROOT}/intrinsic/{CAMERA_NAME}', config.FILE_EXTENSIONS)
+    
+    images = get_images(f'{ROOT}/intrinsic/{CAMERA_NAME}', config.FILE_EXTENSIONS)
 
     print(f'Computing...')
     ret, mtx, dist, rvec, tvec = calibrate_camera(
@@ -78,10 +93,10 @@ if __name__ == '__main__':
     print(f'Reprojection Error: {ret}')
 
     if SAVE_RESULT:
-        savedData = {
+        saved_data = {
             'K': mtx,
             'Dist': dist,
         }
         
-        with open(f'{DATA_ROOT}/intrinsic/{CAMERA_NAME}/camera_parameter.pkl', 'wb') as f:
-            pickle.dump(savedData, f)
+        with open(f'{ROOT}/intrinsic/{CAMERA_NAME}/camera_parameter.pkl', 'wb') as f:
+            pickle.dump(saved_data, f)
