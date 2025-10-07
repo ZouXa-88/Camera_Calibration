@@ -12,7 +12,7 @@ def get_R_matrix(R_matrix_3x3):
     Returns the 3x3 rotation matrix. Assumes input is already a 3x3 matrix.
     If the input R was a Rodrigues vector, conversion would be needed here.
     """
-    return R_matrix_3x3
+    return R_matrix_3x3.T
 
 def get_T_world_position(R_matrix_3x3, T_vector_3x1):
     """
