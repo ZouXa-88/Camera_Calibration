@@ -6,20 +6,26 @@ For the format of config.yaml and points.xlsx, you can refer to [example](https:
 The directory tree of prepared calibration data should look like below:
 ```
 {ROOT}
-    |-- intrinsic
-        |-- camera0
-            |-- checkerboard001.jpg
-            |-- checkerboard002.jpg
-            |-- checkerboard003.jpg
-            ...
-            |-- config.yaml
-            |-- camera_parameter.pkl <-- The output of CameraCalibrator_Checkerboard.py
-        |-- camera1
-        ...
-    |-- extrinsic
-        |-- config.yaml
-        |-- points.xlsx
-    |-- camera_parameter.pickle <-- The output of CameraCalibrator_Floor.py
+├─── intrinsic
+│    ├─── camera0
+│    │    ├─── checkerboard001.jpg
+│    │    ├─── checkerboard002.jpg
+│    │    ├─── checkerboard003.jpg
+│    │    ├─── ...
+│    │    ├─── config.yaml
+│    │    └─── camera_parameter.pkl <-- The output of CameraCalibrator_Checkerboard.py
+│    ├─── camera1
+│    └─── ...
+├─── extrinsic
+│    ├─── config.yaml
+│    └─── points.xlsx
+└─── camera_parameter.pickle <-- The output of CameraCalibrator_Floor.py
+```
+
+To convert videos to images for intrinsic calibration, you can place the checkerboard videos captured from every camera under intrinsic folder.\
+Then run:
+```
+python video2images.py {your_path_to_intrinsic_folder}
 ```
 
 ## How to run
