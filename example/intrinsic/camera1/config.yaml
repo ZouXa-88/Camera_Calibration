@@ -1,8 +1,8 @@
 CHESSBOARD:
   SQUARE_SIZE: 0.1 # m
   SHAPE:
-    ROWS: 3
-    COLS: 3
+    ROWS: 4
+    COLS: 4
 FILE_EXTENSIONS:
   - '.jpg'
 RESOLUTION:

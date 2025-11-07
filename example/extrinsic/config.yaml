@@ -5,7 +5,7 @@ CHESSBOARD:
     ROWS: 3
     COLS: 3
   CENTER: # zero-indexed
-    ROW: 0
+    ROW: 2
     COL: 0
 CAMERA_IDS: 
   - 0
