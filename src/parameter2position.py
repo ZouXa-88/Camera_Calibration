@@ -165,7 +165,7 @@ def show_cameras(camera_positions):
     # Alternatively, for Matplotlib 3.3+
     # ax.set_box_aspect([1,1,1]) # This is a simpler way to force a cubic plot box
 
-    plt.legend() # Display the legend for camera positions
+    plt.legend(handles=[]) # Display the legend for camera positions
     plt.grid(True) # Show grid for better spatial context
     plt.tight_layout() # Adjust plot to prevent labels from overlapping
     plt.show()
