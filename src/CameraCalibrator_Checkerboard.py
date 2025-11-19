@@ -7,6 +7,7 @@ import random
 import matplotlib.pyplot as plt
 import pickle
 import argparse
+from tqdm import tqdm
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -36,7 +37,7 @@ def get_images(folder: str, extensions: list[str]):
     print(f'Total number of images: {len(images)}')
     return images
 
-# Intrinsic parameters
+# Intrinsic matrix
 def calibrate_camera(images: list[str], checkerboard_size: iter, square_size: int, resolution: iter):
     objp = np.zeros((checkerboard_size[0] * checkerboard_size[1], 3), np.float32)
     objp[:, :2] = np.mgrid[0:checkerboard_size[0], 0:checkerboard_size[1]].T.reshape(-1, 2) * square_size
@@ -48,20 +49,27 @@ def calibrate_camera(images: list[str], checkerboard_size: iter, square_size: in
     
     random.shuffle(images) # Randomly pick images
     
-    for img_path in images:
-        img = cv2.imread(img_path)
-        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    with tqdm(total=len(images), desc='Detecting checkerboard from images', unit='data', ncols=100) as pbar:
+        for img_path in images:
+            img = cv2.imread(img_path)
+            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-        flags = cv2.CALIB_CB_ADAPTIVE_THRESH + cv2.CALIB_CB_NORMALIZE_IMAGE
-        ret, corners = cv2.findChessboardCorners(gray, checkerboard_size, None, flags=flags)
-        if ret:
-            objpoints.append(objp)
-            imgpoints.append(corners)
-            count += 1
-        if count >= max_num_images:
-            break
+            flags = cv2.CALIB_CB_ADAPTIVE_THRESH + cv2.CALIB_CB_NORMALIZE_IMAGE
+            ret, corners = cv2.findChessboardCorners(gray, checkerboard_size, None, flags=flags)
+            if ret:
+                objpoints.append(objp)
+                imgpoints.append(corners)
+                count += 1
+
+            pbar.update(1)
+            pbar.set_postfix_str(f"Collected: {count}/{max_num_images}")
+
+            if count >= max_num_images:
+                pbar.write(f"✅ Target of {max_num_images} samples reached! Stopping iteration.")
+                break
             
     print(f'Number of images to compute intrinsic matrix: {count}')
+    print(f'Computing intrinsic matrix...')
     ret, mtx, dist, rvec, tvec = cv2.calibrateCamera(objpoints, imgpoints, resolution, None, None)
     
     return ret, mtx, dist, rvec, tvec
@@ -80,7 +88,6 @@ if __name__ == '__main__':
     
     images = get_images(f'{ROOT}/intrinsic/{CAMERA_NAME}', config.FILE_EXTENSIONS)
 
-    print(f'Computing...')
     ret, mtx, dist, rvec, tvec = calibrate_camera(
         images, 
         CHESSBOARD_SIZE, 
