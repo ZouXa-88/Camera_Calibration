@@ -46,17 +46,28 @@ def get_intrinsic(pkl_file: str):
         print(f'No intrinsic pickle file found: {pkl_file}')
         exit(1)
     
+def get_chessboard(CHESSBOARDS: list, camera_id: int):
+    for CHESSBOARD in CHESSBOARDS:
+        if camera_id in CHESSBOARD.CAMERA_IDS:
+            return CHESSBOARD
+        
+    print(f'Error: Camera id \'{camera_id}\' isn\'t in any CHESSBOARDS')
+    exit(1)
 
-def pack_points(CHESSBOARD_SIZE, SQUARE_SIZE, grid_points, CENTER):
+def pack_points(CHESSBOARD, grid_points):
     world_points = []
     image_points = []
 
-    for i in range(CHESSBOARD_SIZE[0]):
-        for j in range(CHESSBOARD_SIZE[1]):
+    for i in range(CHESSBOARD.SHAPE.ROWS):
+        for j in range(CHESSBOARD.SHAPE.COLS):
             try:
                 if type(grid_points[i][j]) is not float:
                     image_points.append(list(eval(grid_points[i][j])))
-                    world_points.append([(j - CENTER[1]) * SQUARE_SIZE, (CENTER[0] - i) * SQUARE_SIZE, 0.0])
+                    world_points.append([
+                        (j - CHESSBOARD.CENTER.EXCEL_INDEX.COL) * CHESSBOARD.SQUARE_SIZE + CHESSBOARD.CENTER.COORDINATE_3D.X, 
+                        (CHESSBOARD.CENTER.EXCEL_INDEX.ROW - i) * CHESSBOARD.SQUARE_SIZE + CHESSBOARD.CENTER.COORDINATE_3D.Y, 
+                        0.0
+                    ])
             except IndexError:
                 continue
 
@@ -116,11 +127,8 @@ if __name__ == '__main__':
     # Fetch configurations
     config = get_config(f'{ROOT}/extrinsic/config.yaml')
     EXCEL_FILE = config.EXCEL_FILE
-    CHESSBOARD_SIZE = (config.CHESSBOARD.SHAPE.ROWS, config.CHESSBOARD.SHAPE.COLS)
-    SQUARE_SIZE = config.CHESSBOARD.SQUARE_SIZE
-    CENTER = (config.CHESSBOARD.CENTER.ROW, config.CHESSBOARD.CENTER.COL)
-    CAMERA_IDS = config.CAMERA_IDS
-    RESOLUTION = config.RESOLUTION
+    CHESSBOARDS = config.CHESSBOARDS
+    ALL_CAMERA_IDS = config.ALL_CAMERA_IDS
     SHARED_INTRINSIC = config.SHARED_INTRINSIC
     
     # Get labeled points from excel file
@@ -145,9 +153,11 @@ if __name__ == '__main__':
 
     Ks, RTs, Ps = [], [], []
     
-    for camera_id in CAMERA_IDS:
+    for camera_id in ALL_CAMERA_IDS:
+        CHESSBOARD = get_chessboard(CHESSBOARDS, camera_id)
         camera_name = f'camera{camera_id}'
-        world_points, image_points = pack_points(CHESSBOARD_SIZE, SQUARE_SIZE, grid_points[camera_name], CENTER)
+        world_points, image_points = pack_points(CHESSBOARD, grid_points[camera_name])
+        print(world_points)
         
         R, T = get_RT(world_points, image_points, intrinsic[camera_name]['K'])
 
