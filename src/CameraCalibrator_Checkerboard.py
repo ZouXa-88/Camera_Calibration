@@ -13,7 +13,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
     
     parser.add_argument('root', help='The path to the root of calibration data')
-    parser.add_argument('--camera_name', help='The folder name of the camera you want to calibrate')
+    parser.add_argument('--camera_name', required=True, help='The folder name of the camera you want to calibrate')
     parser.add_argument('--run_only', action='store_true', help='Don\'t save the result, since it will replace previous file')
     
     args = parser.parse_args()
