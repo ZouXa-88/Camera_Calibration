@@ -157,7 +157,6 @@ if __name__ == '__main__':
         CHESSBOARD = get_chessboard(CHESSBOARDS, camera_id)
         camera_name = f'camera{camera_id}'
         world_points, image_points = pack_points(CHESSBOARD, grid_points[camera_name])
-        print(world_points)
         
         R, T = get_RT(world_points, image_points, intrinsic[camera_name]['K'])
 
